@@ -10,8 +10,10 @@ type API struct {
 	service *task.Service
 }
 
-func New() *API {
-	return &API{}
+func New(service *task.Service) *API {
+	return &API{
+		service: service,
+	}
 }
 
 func (a *API) Get(w http.ResponseWriter, r *http.Request) {
