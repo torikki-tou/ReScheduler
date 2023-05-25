@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/spf13/viper v1.15.0
+	github.com/wangjia184/sortedset v0.0.0-20220209072355-af6d6d227aa7
 	go.uber.org/fx v1.19.3
 )
 
