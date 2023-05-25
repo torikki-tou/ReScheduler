@@ -3,6 +3,7 @@ package task
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/torikki-tou/ReScheduler/internal/services/task"
+	serviceDto "github.com/torikki-tou/ReScheduler/internal/services/task/dto"
 	"net/http"
 )
 
@@ -17,23 +18,28 @@ func New(service *task.Service) *API {
 }
 
 func (a *API) Get(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte(a.service.Get() + " " + chi.URLParam(r, "id")))
+	a.service.Get(&serviceDto.GetRequest{})
+	_, _ = w.Write([]byte("get"))
 }
 
 func (a *API) Search(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte(a.service.Search()))
+	a.service.Search(&serviceDto.SearchRequest{})
+	_, _ = w.Write([]byte("search"))
 }
 
 func (a *API) Create(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte(a.service.Create()))
+	a.service.Create(&serviceDto.CreateRequest{})
+	_, _ = w.Write([]byte("create"))
 }
 
 func (a *API) Update(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte(a.service.Update() + " " + chi.URLParam(r, "id")))
+	a.service.Update(&serviceDto.UpdateRequest{})
+	_, _ = w.Write([]byte("update"))
 }
 
 func (a *API) Delete(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte(a.service.Delete() + " " + chi.URLParam(r, "id")))
+	a.service.Delete(&serviceDto.DeleteRequest{})
+	_, _ = w.Write([]byte("delete"))
 }
 func (a *API) Router() *chi.Mux {
 	router := chi.NewRouter()
