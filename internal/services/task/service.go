@@ -20,13 +20,7 @@ func (s *Service) Get(req *dto.GetRequest) *dto.GetResponse {
 
 	res := s.repository.Get(&repositoryDto.GetRequest{ID: req.ID})
 
-	task := res.Task
-
-	return &dto.GetResponse{Task: dto.Task{
-		ID:             task.ID,
-		CronExpression: task.CronExpression,
-		Message:        task.Message,
-	}}
+	return &dto.GetResponse{Task: *s.fromRepository(&res.Task)}
 }
 
 func (s *Service) Search(req *dto.SearchRequest) *dto.SearchResponse {
@@ -34,11 +28,7 @@ func (s *Service) Search(req *dto.SearchRequest) *dto.SearchResponse {
 
 	var tasks = make([]dto.Task, 0, len(res.Tasks))
 	for _, task := range res.Tasks {
-		tasks = append(tasks, dto.Task{
-			ID:             task.ID,
-			CronExpression: task.CronExpression,
-			Message:        task.Message,
-		})
+		tasks = append(tasks, *s.fromRepository(&task))
 	}
 
 	return &dto.SearchResponse{Tasks: tasks}
@@ -59,13 +49,7 @@ func (s *Service) Create(req *dto.CreateRequest) *dto.CreateResponse {
 		Message:        req.Message,
 	})
 
-	task := res.Task
-
-	return &dto.CreateResponse{Task: dto.Task{
-		ID:             task.ID,
-		CronExpression: task.CronExpression,
-		Message:        task.Message,
-	}}
+	return &dto.CreateResponse{Task: *s.fromRepository(&res.Task)}
 }
 
 func (s *Service) Update(req *dto.UpdateRequest) *dto.UpdateResponse {
@@ -76,11 +60,13 @@ func (s *Service) Delete(req *dto.DeleteRequest) *dto.DeleteResponse {
 
 	res := s.repository.Delete(&repositoryDto.DeleteRequest{ID: req.ID})
 
-	task := res.Task
+	return &dto.DeleteResponse{Task: *s.fromRepository(&res.Task)}
+}
 
-	return &dto.DeleteResponse{Task: dto.Task{
-		ID:             task.ID,
-		CronExpression: task.CronExpression,
-		Message:        task.Message,
-	}}
+func (s *Service) fromRepository(req *repositoryDto.Task) *dto.Task {
+	return &dto.Task{
+		ID:             req.ID,
+		CronExpression: req.CronExpression,
+		Message:        req.Message,
+	}
 }
