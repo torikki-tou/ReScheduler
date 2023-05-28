@@ -6,6 +6,7 @@ import (
 	taskV1Api "github.com/torikki-tou/ReScheduler/internal/api/v1/api/task"
 	configComponent "github.com/torikki-tou/ReScheduler/internal/components/config"
 	serverComponent "github.com/torikki-tou/ReScheduler/internal/components/server"
+	taskRepository "github.com/torikki-tou/ReScheduler/internal/repositories/task/memory"
 	taskService "github.com/torikki-tou/ReScheduler/internal/services/task"
 	"go.uber.org/fx"
 )
@@ -18,8 +19,11 @@ func main() {
 				config.SetDefaults()
 				return config
 			},
-			func() *taskService.Service {
-				return taskService.New()
+			func() *taskRepository.Repository {
+				return taskRepository.New()
+			},
+			func(repository *taskRepository.Repository) *taskService.Service {
+				return taskService.New(repository)
 			},
 			func(service *taskService.Service) *taskV1Api.API {
 				return taskV1Api.New(service)
