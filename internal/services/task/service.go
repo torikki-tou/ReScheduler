@@ -65,7 +65,23 @@ func (s *Service) Create(req *dto.CreateRequest) (*dto.CreateResponse, error) {
 }
 
 func (s *Service) Update(req *dto.UpdateRequest) *dto.UpdateResponse {
-	return &dto.UpdateResponse{}
+
+	updatedTask := s.Get(&dto.GetRequest{ID: req.ID})
+
+	if updatedTask == nil {
+		return &dto.UpdateResponse{}
+	}
+
+	res := s.repository.Update(&repositoryDto.UpdateRequest{
+		ID: req.ID,
+		Update: repositoryDto.TaskUpdate{
+			ID:             req.Update.ID,
+			CronExpression: req.Update.CronExpression,
+			Message:        req.Update.Message,
+		},
+	})
+
+	return &dto.UpdateResponse{Task: *s.fromRepository(&res.Task)}
 }
 
 func (s *Service) Delete(req *dto.DeleteRequest) *dto.DeleteResponse {

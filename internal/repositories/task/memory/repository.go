@@ -55,7 +55,22 @@ func (r *Repository) Create(req *dto.CreateRequest) *dto.CreateResponse {
 }
 
 func (r *Repository) Update(req *dto.UpdateRequest) *dto.UpdateResponse {
-	return &dto.UpdateResponse{}
+	updatedTask := r.Get(&dto.GetRequest{ID: req.ID})
+
+	updatedTask.Task.CronExpression = updateField(req.Update.CronExpression, updatedTask.Task.CronExpression)
+	updatedTask.Task.Message = updateField(req.Update.Message, updatedTask.Task.Message)
+	updatedTask.Task.ID = updateField(req.Update.ID, updatedTask.Task.ID)
+
+	r.set.Remove(req.ID)
+	r.set.AddOrUpdate(updatedTask.Task.ID, 1, updatedTask)
+
+	return &dto.UpdateResponse{
+		Task: dto.Task{
+			ID:             updatedTask.Task.ID,
+			CronExpression: updatedTask.Task.CronExpression,
+			Message:        updatedTask.Task.Message,
+		},
+	}
 }
 
 func (r *Repository) Delete(req *dto.DeleteRequest) *dto.DeleteResponse {
