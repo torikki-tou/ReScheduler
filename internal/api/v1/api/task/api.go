@@ -70,11 +70,14 @@ func (a *API) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := a.service.Create(&serviceDto.CreateRequest{
+	res, err := a.service.Create(&serviceDto.CreateRequest{
 		ID:             req.ID,
 		CronExpression: req.CronExpression,
 		Message:        req.Message,
 	})
+	if err != nil {
+		return
+	}
 
 	render.JSON(w, r, dto.CreateResponse{Task: *a.fromService(&res.Task)})
 }

@@ -1,6 +1,7 @@
 package task
 
 import (
+	"errors"
 	taskRepository "github.com/torikki-tou/ReScheduler/internal/repositories/task"
 	repositoryDto "github.com/torikki-tou/ReScheduler/internal/repositories/task/dto"
 	"github.com/torikki-tou/ReScheduler/internal/services/task/dto"
@@ -34,11 +35,16 @@ func (s *Service) Search(req *dto.SearchRequest) *dto.SearchResponse {
 	return &dto.SearchResponse{Tasks: tasks}
 }
 
-func (s *Service) Create(req *dto.CreateRequest) *dto.CreateResponse {
+func (s *Service) Create(req *dto.CreateRequest) (*dto.CreateResponse, error) {
 
 	var id string
 	if req.ID != nil {
 		id = *req.ID
+
+		task := s.repository.Get(&repositoryDto.GetRequest{ID: id})
+		if task != nil {
+			return nil, errors.New("exists")
+		}
 	} else {
 		id = "1"
 	}
@@ -49,7 +55,7 @@ func (s *Service) Create(req *dto.CreateRequest) *dto.CreateResponse {
 		Message:        req.Message,
 	})
 
-	return &dto.CreateResponse{Task: *s.fromRepository(&res.Task)}
+	return &dto.CreateResponse{Task: *s.fromRepository(&res.Task)}, nil
 }
 
 func (s *Service) Update(req *dto.UpdateRequest) *dto.UpdateResponse {
