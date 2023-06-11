@@ -1,8 +1,8 @@
 package task
 
 import (
-	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
 	"github.com/torikki-tou/ReScheduler/internal/api/v1/api/task/dto"
 	taskService "github.com/torikki-tou/ReScheduler/internal/services/task"
 	serviceDto "github.com/torikki-tou/ReScheduler/internal/services/task/dto"
@@ -34,23 +34,20 @@ func (a *API) Router() *chi.Mux {
 func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.GetRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err := req.Bind(r)
 	if err != nil {
 		return
 	}
 
 	res := a.service.Get(&serviceDto.GetRequest{ID: req.ID})
 
-	err = json.NewEncoder(w).Encode(dto.GetResponse{Task: *a.fromService(&res.Task)})
-	if err != nil {
-		return
-	}
+	render.JSON(w, r, res)
 }
 
 func (a *API) Search(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.SearchRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err := req.Bind(r)
 	if err != nil {
 		return
 	}
@@ -62,16 +59,13 @@ func (a *API) Search(w http.ResponseWriter, r *http.Request) {
 		tasks = append(tasks, *a.fromService(&task))
 	}
 
-	err = json.NewEncoder(w).Encode(dto.SearchResponse{Tasks: tasks})
-	if err != nil {
-		return
-	}
+	render.JSON(w, r, dto.SearchResponse{Tasks: tasks})
 }
 
 func (a *API) Create(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.CreateRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err := req.Bind(r)
 	if err != nil {
 		return
 	}
@@ -82,16 +76,13 @@ func (a *API) Create(w http.ResponseWriter, r *http.Request) {
 		Message:        req.Message,
 	})
 
-	err = json.NewEncoder(w).Encode(dto.CreateResponse{Task: *a.fromService(&res.Task)})
-	if err != nil {
-		return
-	}
+	render.JSON(w, r, dto.CreateResponse{Task: *a.fromService(&res.Task)})
 }
 
 func (a *API) Update(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.UpdateRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err := req.Bind(r)
 	if err != nil {
 		return
 	}
@@ -105,26 +96,20 @@ func (a *API) Update(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 
-	err = json.NewEncoder(w).Encode(dto.UpdateResponse{Task: *a.fromService(&res.Task)})
-	if err != nil {
-		return
-	}
+	render.JSON(w, r, dto.UpdateResponse{Task: *a.fromService(&res.Task)})
 }
 
 func (a *API) Delete(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.DeleteRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err := req.Bind(r)
 	if err != nil {
 		return
 	}
 
 	res := a.service.Delete(&serviceDto.DeleteRequest{ID: req.ID})
 
-	err = json.NewEncoder(w).Encode(dto.DeleteResponse{Task: *a.fromService(&res.Task)})
-	if err != nil {
-		return
-	}
+	render.JSON(w, r, dto.DeleteResponse{Task: *a.fromService(&res.Task)})
 }
 
 func (a *API) fromService(req *serviceDto.Task) *dto.Task {
