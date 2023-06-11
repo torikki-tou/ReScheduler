@@ -1,6 +1,9 @@
 package dto
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 type (
 	CreateRequest struct {
@@ -13,3 +16,7 @@ type (
 		Task Task `json:"task"`
 	}
 )
+
+func (r *CreateRequest) Bind(req *http.Request) error {
+	return json.NewDecoder(req.Body).Decode(&r)
+}
