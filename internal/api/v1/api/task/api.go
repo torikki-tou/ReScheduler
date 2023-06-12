@@ -22,7 +22,6 @@ func New(service *taskService.Service) *API {
 func (a *API) Router() *chi.Mux {
 	router := chi.NewRouter()
 
-	router.Get("/", a.Search)
 	router.Get("/{id}", a.Get)
 	router.Post("/", a.Create)
 	router.Patch("/{id}", a.Update)
@@ -39,27 +38,12 @@ func (a *API) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := a.service.Get(&serviceDto.GetRequest{ID: req.ID})
-
-	render.JSON(w, r, res)
-}
-
-func (a *API) Search(w http.ResponseWriter, r *http.Request) {
-
-	var req dto.SearchRequest
-	err := req.Bind(r)
+	res, err := a.service.Get(&serviceDto.GetRequest{ID: req.ID})
 	if err != nil {
 		return
 	}
 
-	res := a.service.Search(&serviceDto.SearchRequest{Limit: req.Limit})
-
-	var tasks = make([]dto.Task, 0, len(res.Tasks))
-	for _, task := range res.Tasks {
-		tasks = append(tasks, *a.fromService(&task))
-	}
-
-	render.JSON(w, r, dto.SearchResponse{Tasks: tasks})
+	render.JSON(w, r, res)
 }
 
 func (a *API) Create(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +74,7 @@ func (a *API) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := a.service.Update(&serviceDto.UpdateRequest{
+	res, err := a.service.Update(&serviceDto.UpdateRequest{
 		ID: req.ID,
 		Update: serviceDto.TaskUpdate{
 			ID:             req.Update.ID,
@@ -98,6 +82,9 @@ func (a *API) Update(w http.ResponseWriter, r *http.Request) {
 			Message:        req.Update.Message,
 		},
 	})
+	if err != nil {
+		return
+	}
 
 	render.JSON(w, r, dto.UpdateResponse{Task: *a.fromService(&res.Task)})
 }
@@ -110,7 +97,10 @@ func (a *API) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := a.service.Delete(&serviceDto.DeleteRequest{ID: req.ID})
+	res, err := a.service.Delete(&serviceDto.DeleteRequest{ID: req.ID})
+	if err != nil {
+		return
+	}
 
 	render.JSON(w, r, dto.DeleteResponse{Task: *a.fromService(&res.Task)})
 }
