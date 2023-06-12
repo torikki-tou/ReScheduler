@@ -49,7 +49,7 @@ func (r *Repository) Create(req *dto.CreateRequest) *dto.CreateResponse {
 		CronExpression: req.CronExpression,
 		Message:        req.Message,
 	}
-	r.set.AddOrUpdate(task.ID, 1, task)
+	r.set.AddOrUpdate(task.ID, sortedset.SCORE(req.Score), task)
 
 	return &dto.CreateResponse{Task: task}
 }
