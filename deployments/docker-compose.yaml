@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      dockerfile: build/Dockerfile
+      context: ..
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
