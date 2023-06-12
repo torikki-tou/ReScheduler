@@ -12,8 +12,4 @@ type (
 		CronExpression *string
 		Message        *json.RawMessage
 	}
-
-	UpdateResponse struct {
-		Task Task
-	}
 )

@@ -18,22 +18,14 @@ func New(repository taskRepository.Repository) *Service {
 	}
 }
 
-func (s *Service) Get(req *dto.GetRequest) *dto.GetResponse {
+func (s *Service) Get(req *dto.GetRequest) (*dto.GetResponse, error) {
 
-	res := s.repository.Get(&repositoryDto.GetRequest{ID: req.ID})
-
-	return &dto.GetResponse{Task: *s.fromRepository(&res.Task)}
-}
-
-func (s *Service) Search(req *dto.SearchRequest) *dto.SearchResponse {
-	res := s.repository.Search(&repositoryDto.SearchRequest{Limit: req.Limit})
-
-	var tasks = make([]dto.Task, 0, len(res.Tasks))
-	for _, task := range res.Tasks {
-		tasks = append(tasks, *s.fromRepository(&task))
+	res, err := s.repository.Get(&repositoryDto.GetRequest{ID: req.ID})
+	if err != nil {
+		return nil, err
 	}
 
-	return &dto.SearchResponse{Tasks: tasks}
+	return &dto.GetResponse{Task: *s.fromRepository(&res.Task)}, nil
 }
 
 func (s *Service) Create(req *dto.CreateRequest) (*dto.CreateResponse, error) {
@@ -42,7 +34,11 @@ func (s *Service) Create(req *dto.CreateRequest) (*dto.CreateResponse, error) {
 	if req.ID != nil {
 		id = *req.ID
 
-		task := s.repository.Get(&repositoryDto.GetRequest{ID: id})
+		task, err := s.repository.Get(&repositoryDto.GetRequest{ID: id})
+		if err != nil {
+			return nil, err
+		}
+
 		if task != nil {
 			return nil, errors.New("exists")
 		}
@@ -55,24 +51,40 @@ func (s *Service) Create(req *dto.CreateRequest) (*dto.CreateResponse, error) {
 		id = uuidV6.String()
 	}
 
-	res := s.repository.Create(&repositoryDto.CreateRequest{
+	task := dto.Task{
 		ID:             id,
 		CronExpression: req.CronExpression,
 		Message:        req.Message,
+	}
+
+	err := s.repository.Create(&repositoryDto.CreateRequest{
+		ID:             task.ID,
+		CronExpression: task.CronExpression,
+		Message:        task.Message,
 	})
+	if err != nil {
+		return nil, err
+	}
 
-	return &dto.CreateResponse{Task: *s.fromRepository(&res.Task)}, nil
+	return &dto.CreateResponse{Task: task}, nil
 }
 
-func (s *Service) Update(req *dto.UpdateRequest) *dto.UpdateResponse {
-	return &dto.UpdateResponse{}
+func (s *Service) Update(req *dto.UpdateRequest) (*dto.UpdateResponse, error) {
+	return &dto.UpdateResponse{}, nil
 }
 
-func (s *Service) Delete(req *dto.DeleteRequest) *dto.DeleteResponse {
+func (s *Service) Delete(req *dto.DeleteRequest) (*dto.DeleteResponse, error) {
 
-	res := s.repository.Delete(&repositoryDto.DeleteRequest{ID: req.ID})
+	task, err := s.Get(&dto.GetRequest{ID: req.ID})
+	if err != nil {
+		return nil, err
+	}
 
-	return &dto.DeleteResponse{Task: *s.fromRepository(&res.Task)}
+	if err := s.repository.Delete(&repositoryDto.DeleteRequest{ID: req.ID}); err != nil {
+		return nil, err
+	}
+
+	return &dto.DeleteResponse{Task: task.Task}, nil
 }
 
 func (s *Service) fromRepository(req *repositoryDto.Task) *dto.Task {

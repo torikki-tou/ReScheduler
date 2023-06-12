@@ -7,3 +7,11 @@ type Task struct {
 	CronExpression string
 	Message        json.RawMessage
 }
+
+func (t *Task) Unmarshall(raw []byte) error {
+	return json.Unmarshal(raw, t)
+}
+
+func (t *Task) Marshall() ([]byte, error) {
+	return json.Marshal(t)
+}
