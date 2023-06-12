@@ -2,6 +2,7 @@ package task
 
 import (
 	"errors"
+	"github.com/gofrs/uuid"
 	taskRepository "github.com/torikki-tou/ReScheduler/internal/repositories/task"
 	repositoryDto "github.com/torikki-tou/ReScheduler/internal/repositories/task/dto"
 	"github.com/torikki-tou/ReScheduler/internal/services/task/dto"
@@ -46,7 +47,12 @@ func (s *Service) Create(req *dto.CreateRequest) (*dto.CreateResponse, error) {
 			return nil, errors.New("exists")
 		}
 	} else {
-		id = "1"
+		uuidV6, err := uuid.NewV6()
+		if err != nil {
+			return nil, err
+		}
+
+		id = uuidV6.String()
 	}
 
 	res := s.repository.Create(&repositoryDto.CreateRequest{
