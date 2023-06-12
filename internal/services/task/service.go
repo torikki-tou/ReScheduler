@@ -3,9 +3,11 @@ package task
 import (
 	"errors"
 	"github.com/gofrs/uuid"
+	"github.com/robfig/cron"
 	taskRepository "github.com/torikki-tou/ReScheduler/internal/repositories/task"
 	repositoryDto "github.com/torikki-tou/ReScheduler/internal/repositories/task/dto"
 	"github.com/torikki-tou/ReScheduler/internal/services/task/dto"
+	"time"
 )
 
 type Service struct {
@@ -57,12 +59,17 @@ func (s *Service) Create(req *dto.CreateRequest) (*dto.CreateResponse, error) {
 		Message:        req.Message,
 	}
 
-	err := s.repository.Create(&repositoryDto.CreateRequest{
+	sch, err := cron.Parse(req.CronExpression)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.repository.Create(&repositoryDto.CreateRequest{
 		ID:             task.ID,
+		Score:          sch.Next(time.Now()).Unix(),
 		CronExpression: task.CronExpression,
 		Message:        task.Message,
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
 
