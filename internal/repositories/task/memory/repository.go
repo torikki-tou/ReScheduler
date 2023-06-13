@@ -49,3 +49,19 @@ func (r *Repository) Delete(req *dto.DeleteRequest) error {
 	_ = r.set.Remove(req.ID)
 	return nil
 }
+
+func (r *Repository) SearchByScore(req *dto.SearchByScoreRequest) (*dto.SearchByScoreResponse, error) {
+	nodes := r.set.GetByScoreRange(sortedset.SCORE(req.MaxScore), 0, nil)
+
+	if len(nodes) == 0 {
+		return &dto.SearchByScoreResponse{Tasks: []dto.Task{}}, nil
+	}
+
+	var tasks []dto.Task
+	for _, node := range nodes {
+		task := node.Value.(dto.Task)
+		tasks = append(tasks, task)
+	}
+
+	return &dto.SearchByScoreResponse{Tasks: tasks}, nil
+}

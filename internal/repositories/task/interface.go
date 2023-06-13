@@ -7,4 +7,5 @@ type Repository interface {
 	Create(req *dto.CreateRequest) error
 	Update(req *dto.UpdateRequest) error
 	Delete(req *dto.DeleteRequest) error
+	SearchByScore(req *dto.SearchByScoreRequest) (*dto.SearchByScoreResponse, error)
 }
