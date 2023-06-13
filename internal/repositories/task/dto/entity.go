@@ -4,6 +4,7 @@ import "encoding/json"
 
 type Task struct {
 	ID             string
+	Score          int64
 	CronExpression string
 	Message        json.RawMessage
 }

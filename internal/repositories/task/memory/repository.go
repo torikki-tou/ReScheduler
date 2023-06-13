@@ -23,11 +23,7 @@ func (r *Repository) Get(req *dto.GetRequest) (*dto.GetResponse, error) {
 
 	task := node.Value.(dto.Task)
 
-	return &dto.GetResponse{Task: dto.Task{
-		ID:             task.ID,
-		CronExpression: task.CronExpression,
-		Message:        task.Message,
-	}}, nil
+	return &dto.GetResponse{Task: task}, nil
 }
 
 func (r *Repository) Create(req *dto.CreateRequest) error {
