@@ -8,6 +8,7 @@ import (
 	serverComponent "github.com/torikki-tou/ReScheduler/internal/components/server"
 	taskRepository "github.com/torikki-tou/ReScheduler/internal/repositories/task/memory"
 	taskService "github.com/torikki-tou/ReScheduler/internal/services/task"
+	"github.com/torikki-tou/ReScheduler/internal/worker"
 	"go.uber.org/fx"
 )
 
@@ -37,8 +38,14 @@ func main() {
 			func(api *api.API, config *configComponent.Config) *serverComponent.Server {
 				return serverComponent.New(api.Router(), config)
 			},
+			func(service *taskService.Service) *worker.Worker {
+				return worker.New(service)
+			},
 		),
 		fx.Invoke(
+			func(worker *worker.Worker) {
+				go func() { worker.Run() }()
+			},
 			func(server *serverComponent.Server) {
 				_ = server.Run()
 			},
