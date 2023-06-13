@@ -105,6 +105,27 @@ func (s *Service) GetReady(req *dto.GetReadyRequest) (*dto.GetReadyResponse, err
 
 	var tasks = make([]dto.Task, 0, len(res.Tasks))
 	for _, task := range res.Tasks {
+
+		if err := s.repository.Delete(&repositoryDto.DeleteRequest{
+			ID: task.ID,
+		}); err != nil {
+			println(err.Error())
+		}
+
+		sch, err := cron.Parse(task.CronExpression)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := s.repository.Create(&repositoryDto.CreateRequest{
+			ID:             task.ID,
+			Score:          sch.Next(time.Unix(task.Score, 0)).Unix(),
+			CronExpression: task.CronExpression,
+			Message:        task.Message,
+		}); err != nil {
+			println(err.Error())
+		}
+
 		tasks = append(tasks, *s.fromRepository(&task))
 	}
 
