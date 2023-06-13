@@ -93,6 +93,23 @@ func (s *Service) Delete(req *dto.DeleteRequest) (*dto.DeleteResponse, error) {
 
 	return &dto.DeleteResponse{Task: task.Task}, nil
 }
+func (s *Service) GetReady(req *dto.GetReadyRequest) (*dto.GetReadyResponse, error) {
+	res, err := s.repository.SearchByScore(&repositoryDto.SearchByScoreRequest{MaxScore: req.NowTime.Unix()})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(res.Tasks) == 0 {
+		return &dto.GetReadyResponse{Tasks: []dto.Task{}}, nil
+	}
+
+	var tasks = make([]dto.Task, 0, len(res.Tasks))
+	for _, task := range res.Tasks {
+		tasks = append(tasks, *s.fromRepository(&task))
+	}
+
+	return &dto.GetReadyResponse{Tasks: tasks}, nil
+}
 
 func (s *Service) fromRepository(req *repositoryDto.Task) *dto.Task {
 	return &dto.Task{
